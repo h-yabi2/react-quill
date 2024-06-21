@@ -1,3 +1,9 @@
+import MyComponent from "@/app/components/MyComponent";
+
 export default function Home() {
-  return <main className="">test</main>;
+  return (
+    <main className="">
+      <MyComponent />
+    </main>
+  );
 }
