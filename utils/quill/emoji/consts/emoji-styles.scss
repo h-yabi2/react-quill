@@ -1,0 +1,13 @@
+@charset 'UTF-8';
+
+.ql-editor {
+  .ql-emojiblot {
+    vertical-align: baseline;
+    &.nodo-emoji {
+      height: calc(line-height);
+      display: inline-block;
+      line-height: inherit;
+      font-size: inherit;
+    }
+  }
+}
