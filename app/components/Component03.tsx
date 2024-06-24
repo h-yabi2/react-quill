@@ -7,7 +7,12 @@ import "react-quill/dist/quill.snow.css";
 // ReactQuill の icon をインポート
 const icons = ReactQuill.Quill.import("ui/icons");
 import qlColor from "@/public/img/ql-color.svg";
+import qlBackground from "@/public/img/ql-background.svg";
+import qlEmoji from "@/public/img/ql-emoji.svg";
+
+// デフォルトのアイコンを上書き
 icons["color"] = '<img src="' + qlColor.src + '" alt="" />';
+icons["background"] = '<img src="' + qlBackground.src + '" alt="" />';
 
 const deltaData = {
   ops: [
@@ -26,15 +31,39 @@ const Component03: React.FC = () => {
       toolbar: {
         container: "#toolbar", // id="toorbar"のHTMLエレメントにツールバーを入れる
         handlers: {
-          // bold: () => {
-          //   if (quillRef.current && quillRef.current.editor) {
-          //     const range = quillRef.current.editor.getSelection();
-          //     console.log(range);
-          //     if (range) {
-          //       quillRef.current.editor.format("bold", true);
-          //     }
-          //   }
-          // },
+          test: () => {
+            // 画像を挿入
+            if (quillRef.current && quillRef.current.editor) {
+              const range = quillRef.current.editor.getSelection();
+              if (range) {
+                quillRef.current.editor.insertEmbed(
+                  range.index,
+                  "image",
+                  "https://www.google.co.jp/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"
+                );
+              }
+            }
+          },
+          popup: () => {
+            // ポップアップ
+            const popup = document.querySelector(".ql-popup-content");
+            if (popup) {
+              if (popup.classList.contains("hidden")) {
+                popup.classList.remove("hidden");
+              } else {
+                popup.classList.add("hidden");
+              }
+            }
+            // クリック対象以外をクリックしたら、非表示にする
+            document.addEventListener("click", (e) => {
+              const target = e.target as HTMLElement;
+              if (target && !target.closest(".ql-popup")) {
+                if (popup) {
+                  popup.classList.add("hidden");
+                }
+              }
+            });
+          },
         },
       },
     };
@@ -46,6 +75,7 @@ const Component03: React.FC = () => {
         quillRef.current.editor,
         JSON.parse(JSON.stringify(deltaData))
       );
+      // 編集可能にする
       quillRef.current.editor.enable();
     }
   }, []);
@@ -72,6 +102,10 @@ const Component03: React.FC = () => {
     // console.log(json);
   };
 
+  const handleClick = () => {
+    alert("ポップアップ");
+  };
+
   return (
     <div>
       <div id="toolbar">
@@ -90,6 +124,27 @@ const Component03: React.FC = () => {
           <option value="yellow"></option>
           <option></option>
         </select>
+        <select className="ql-background" defaultValue="">
+          <option value="red"></option>
+          <option value="green"></option>
+          <option value="blue"></option>
+          <option value="orange"></option>
+          <option value="yellow"></option>
+          <option></option>
+        </select>
+        <button className="ql-image" value="idea"></button>
+        <button className="ql-emoji">
+          <img src={qlEmoji.src} alt="" />
+        </button>
+        <button className="ql-test">画像挿入</button>
+        <button className="ql-popup relative">
+          ポップアップ
+          <div className="ql-popup-content hidden absolute z-20 top-[100%] left-0 bg-white border border-gray-300 shadow-lg">
+            <div className="p-2 w-[200px] h-[200px]" onClick={handleClick}>
+              ポップアップ
+            </div>
+          </div>
+        </button>
       </div>
       <ReactQuill
         ref={quillRef}
