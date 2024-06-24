@@ -4,6 +4,11 @@ import React, { useMemo, useRef, useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
+// ReactQuill の icon をインポート
+const icons = ReactQuill.Quill.import("ui/icons");
+import qlColor from "@/public/img/ql-color.svg";
+icons["color"] = '<img src="' + qlColor.src + '" alt="" />';
+
 const deltaData = {
   ops: [
     { insert: "Hello " },
