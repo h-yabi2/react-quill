@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useMemo, useRef, useEffect, useState } from "react";
-import ReactQuill from "react-quill";
+import ReactQuill, { Quill } from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import "@/utils/quill/emoji/custom-emoji";
 
 // ReactQuill の icon をインポート
 const icons = ReactQuill.Quill.import("ui/icons");
@@ -14,17 +15,44 @@ import qlEmoji from "@/public/img/ql-emoji.svg";
 icons["color"] = '<img src="' + qlColor.src + '" alt="" />';
 icons["background"] = '<img src="' + qlBackground.src + '" alt="" />';
 
-const deltaData = {
-  ops: [
-    { insert: "Hello " },
-    { insert: "World!", attributes: { bold: true } },
-    { insert: "\n" },
-  ],
-};
+// delta/collectionDetail.ts から取得したデータ
+import { collectionDetail } from "@/delta/collectionDetail";
 
 const Component03: React.FC = () => {
   const quillRef = useRef<ReactQuill>(null);
-  const [data, setData] = useState(deltaData);
+  const [data, setData] = useState(collectionDetail.body);
+
+  const BlockEmbed = Quill.import("blots/embed");
+  interface FileBlotProps {
+    src: string;
+    name: string;
+    size?: string;
+  }
+
+  // 画像
+  class ImgBlot extends BlockEmbed {
+    static create(data: FileBlotProps): any {
+      const node = super.create();
+      node.setAttribute("data-extension", data.name);
+      node.src = data.src;
+      node.alt = "画像";
+      return node;
+    }
+
+    static value(domNode: HTMLIFrameElement): any {
+      return {
+        name: domNode.getAttribute("data-extension"),
+        src: domNode.getAttribute("src"),
+      };
+    }
+  }
+
+  // MEMO: 編集機能からアップされた画像かどうかを区別するため、img_blotとして別途登録
+  ImgBlot.blotName = "img_blot";
+  ImgBlot.tagName = "img";
+  // MEMO:クラス名など、このサイト固有のものとわかる何かをセットしないとコピペの時にすべてのimgがツールバーから貼り付けたものと見なされてしまう。ここ変更かけると既存データの復元ができなくなる可能性があるので注意
+  ImgBlot.className = "nodoCollectionImg";
+  Quill.register(ImgBlot, true);
 
   const modules = useMemo(() => {
     return {
@@ -66,6 +94,7 @@ const Component03: React.FC = () => {
           },
         },
       },
+      "custom-emoji": true,
     };
   }, []);
 
@@ -73,7 +102,7 @@ const Component03: React.FC = () => {
     if (quillRef.current && quillRef.current.editor) {
       quillRef.current.setEditorContents(
         quillRef.current.editor,
-        JSON.parse(JSON.stringify(deltaData))
+        JSON.parse(collectionDetail.body)
       );
       // 編集可能にする
       quillRef.current.editor.enable();
@@ -81,10 +110,8 @@ const Component03: React.FC = () => {
   }, []);
 
   const handleOnChange = (content: string) => {
-    console.log(content);
     // html to delta
     const delta = quillRef.current?.editor?.clipboard.convert(content);
-    console.log(delta);
 
     // setData データ時に { insert: "\n" } を末尾に追加
     // if (delta && delta.ops) {
@@ -154,9 +181,9 @@ const Component03: React.FC = () => {
         onChange={handleOnChange}
       />
       {/* 整形データ */}
-      <div>
+      {/* <div>
         <pre>{JSON.stringify(data, null, 2)}</pre>
-      </div>
+      </div> */}
     </div>
   );
 };
