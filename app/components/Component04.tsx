@@ -224,6 +224,7 @@ const Component03: React.FC = () => {
         readOnly={true}
         theme="snow"
         onChange={handleOnChange}
+        scrollingContainer="html"
       />
       {/* 整形データ */}
       {/* <div>
