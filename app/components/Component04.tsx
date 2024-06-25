@@ -16,12 +16,18 @@ import qlSearch from "@/public/img/ql-search.svg";
 import qlEdit from "@/public/img/ql-edit.svg";
 import qlListBullet from "@/public/img/ql-list-bullet.svg";
 import qlListOrdered from "@/public/img/ql-list-ordered.svg";
+import qlContent from "@/public/img/ql-content.svg";
+import qlImage from "@/public/img/ql-image.svg";
+import qlFile from "@/public/img/ql-file.svg";
+import qlBlockquote from "@/public/img/ql-blockquote.svg";
 
 // デフォルトのアイコンを上書き
 icons["color"] = '<img src="' + qlColor.src + '" alt="" />';
 icons["background"] = '<img src="' + qlBackground.src + '" alt="" />';
 icons["list"]["bullet"] = '<img src="' + qlListBullet.src + '" alt="" />';
 icons["list"]["ordered"] = '<img src="' + qlListOrdered.src + '" alt="" />';
+icons["image"] = '<img src="' + qlImage.src + '" alt="" />';
+icons["blockquote"] = '<img src="' + qlBlockquote.src + '" alt="" />';
 
 // delta/collectionDetail.ts から取得したデータ
 import { collectionDetail } from "@/delta/collectionDetail";
@@ -146,7 +152,10 @@ const Component03: React.FC = () => {
 
   return (
     <div>
-      <div id="toolbar">
+      <div
+        id="toolbar"
+        className="fixed bottom-[100px] left-0 w-full bg-white z-20"
+      >
         <span className="ql-formats">
           <button className="ql-search">
             <img src={qlSearch.src} alt="" />
@@ -155,6 +164,7 @@ const Component03: React.FC = () => {
             <img src={qlEdit.src} alt="" />
           </button>
         </span>
+
         <span className="ql-formats">
           <select className="ql-header ql-size" defaultValue="">
             <option value="1">見出し（大）</option>
@@ -162,6 +172,7 @@ const Component03: React.FC = () => {
             <option value="">テキスト</option>
           </select>
         </span>
+
         <span className="ql-formats ql-popup relative">
           <img src={qlBold.src} alt="" onClick={handlePopup} />
           <div className="ql-popup-inner absolute z-10 top-[100%] bg-white border border-gray-300 hidden">
@@ -170,6 +181,7 @@ const Component03: React.FC = () => {
             <button className="ql-underline">Underline</button>
           </div>
         </span>
+
         <span className="ql-formats">
           <select className="ql-align" defaultValue="">
             <option value=""></option>
@@ -177,6 +189,7 @@ const Component03: React.FC = () => {
             <option value="right"></option>
           </select>
         </span>
+
         <span className="ql-formats ql-popup relative">
           <img src={qlListBullet.src} alt="" onClick={handlePopup} />
           <div className="ql-popup-inner absolute z-10 top-[100%] bg-white border border-gray-300 hidden">
@@ -185,27 +198,24 @@ const Component03: React.FC = () => {
             <button className="ql-list" value="ordered"></button>
           </div>
         </span>
+
         <span className="ql-formats">
-          <select className="ql-color" defaultValue="">
-            <option value="red"></option>
-            <option value="green"></option>
-            <option value="blue"></option>
-            <option value="orange"></option>
-            <option value="yellow"></option>
-            <option></option>
-          </select>
-          <select className="ql-background" defaultValue="">
-            <option value="red"></option>
-            <option value="green"></option>
-            <option value="blue"></option>
-            <option value="orange"></option>
-            <option value="yellow"></option>
-            <option></option>
-          </select>
-          <button className="ql-image" value="idea"></button>
-          <button className="ql-emoji">
-            <img src={qlEmoji.src} alt="" />
-          </button>
+          <select className="ql-color" defaultValue=""></select>
+          <select className="ql-background" defaultValue=""></select>
+        </span>
+
+        <span className="ql-formats ql-popup relative">
+          <img src={qlContent.src} alt="" onClick={handlePopup} />
+          <div className="ql-popup-inner absolute z-10 top-[100%] bg-white border border-gray-300 hidden">
+            <button className="ql-blockquote"></button>
+            <button className="ql-file">
+              <img src={qlFile.src} alt="" />
+            </button>
+            <button className="ql-image" value="idea"></button>
+            <button className="ql-emoji">
+              <img src={qlEmoji.src} alt="" />
+            </button>
+          </div>
         </span>
       </div>
       <ReactQuill
