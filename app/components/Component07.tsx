@@ -14,7 +14,8 @@ import qlEmoji from "@/public/img/ql-emoji.svg";
 // import data from "@emoji-mart/data";
 // import data from "@emoji-mart/data/sets/13.1/native.json";
 // twitter の絵文字
-import data from "@emoji-mart/data/sets/14/twitter.json";
+// import data from "@emoji-mart/data/sets/14/twitter.json";
+import data from "@emoji-mart/data/sets/14/google.json";
 import Picker from "@emoji-mart/react";
 import i18n from "@emoji-mart/data/i18n/ja.json";
 
@@ -56,6 +57,30 @@ const Component03: React.FC = () => {
   // MEMO:クラス名など、このサイト固有のものとわかる何かをセットしないとコピペの時にすべてのimgがツールバーから貼り付けたものと見なされてしまう。ここ変更かけると既存データの復元ができなくなる可能性があるので注意
   ImgBlot.className = "nodoCollectionImg";
   Quill.register(ImgBlot, true);
+
+  // 絵文字
+  // class EmojiBlot extends BlockEmbed {
+  //   static create(value: any) {
+  //     const node = super.create();
+  //     node.setAttribute("data-id", value.id);
+  //     node.setAttribute("data-is-original", value.isOriginal);
+  //     node.innerText = value.native;
+  //     return node;
+  //   }
+
+  //   static value(node: any) {
+  //     return {
+  //       id: node.getAttribute("data-id"),
+  //       isOriginal: node.getAttribute("data-is-original") === "true",
+  //       native: node.innerText,
+  //     };
+  //   }
+  // }
+
+  // EmojiBlot.blotName = "emoji";
+  // EmojiBlot.tagName = "span";
+  // EmojiBlot.className = "custom-emoji";
+  // Quill.register(EmojiBlot);
 
   const modules = useMemo(() => {
     return {
@@ -140,6 +165,18 @@ const Component03: React.FC = () => {
     // console.log(json);
   };
 
+  const handleEmojiSelect = (emoji: any) => {
+    const quill = quillRef.current?.getEditor();
+    if (quill) {
+      const range = quill.getSelection();
+      quill.insertEmbed(range?.index ?? 0, "emoji", {
+        id: emoji.id,
+        isOriginal: true,
+        // native: emoji.native,
+      });
+    }
+  };
+
   return (
     <div>
       <div
@@ -149,9 +186,9 @@ const Component03: React.FC = () => {
         <div className="emoji-picker">
           <Picker
             data={data}
-            onEmojiSelect={console.log}
+            onEmojiSelect={handleEmojiSelect}
             i18n={i18n}
-            set="twitter"
+            set="google"
           />
         </div>
 
