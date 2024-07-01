@@ -1,5 +1,5 @@
 import { Quill } from "react-quill";
-import "quill-emoji";
+// import "quill-emoji";
 import data from "@emoji-mart/data/sets/14/google.json";
 import { init } from "emoji-mart";
 import EmojMartOptions from "../consts/picker-options";
@@ -8,9 +8,9 @@ import { isEmptyValue } from "@/utils/common";
 init({ data });
 
 // quill-emojiをインポートしたときに、強制的に'formats/emoji'でblotが登録されるので、そこから呼び出す
-const EmojiFormat = Quill.import("formats/emoji");
+// const EmojiFormat = Quill.import("formats/emoji");
 
-export class CustomEmojiBlot extends EmojiFormat {
+export class CustomEmojiBlot extends Quill.import("blots/embed") {
   static create(value) {
     if (value.isOriginal === undefined || !value.isOriginal) {
       // 旧絵文字(quill-emoji)の場合、そのまま返す
