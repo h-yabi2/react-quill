@@ -32,8 +32,11 @@ icons["blockquote"] = '<img src="' + qlBlockquote.src + '" alt="" />';
 // delta/collectionDetail.ts から取得したデータ
 import { collectionDetail } from "@/delta/collectionDetail";
 
+import { useQuillRef } from "@/context/QuillRefContext";
+
 const Component03: React.FC = () => {
   const quillRef = useRef<ReactQuill>(null);
+  const { quillRefContext, setQuillRef } = useQuillRef();
   const [data, setData] = useState(collectionDetail.body);
 
   const BlockEmbed = Quill.import("blots/embed");
@@ -74,6 +77,13 @@ const Component03: React.FC = () => {
         container: "#toolbar", // id="toorbar"のHTMLエレメントにツールバーを入れる
         handlers: {
           popup: () => {},
+          emoji: () => {
+            // setQuillRef に quillRef をセット
+            console.log(quillRef.current?.editor);
+            if (quillRef.current) {
+              setQuillRef(quillRef.current);
+            }
+          },
         },
       },
       "custom-emoji": true,
