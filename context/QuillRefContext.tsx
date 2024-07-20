@@ -12,7 +12,6 @@ import ReactQuill from "react-quill";
 
 // Contextの型定義
 interface QuillRefContextType {
-  quillRefContext: React.RefObject<ReactQuill>;
   ref: ReactQuill | null;
   setQuillRef: (ref: ReactQuill) => void;
 }
@@ -26,19 +25,14 @@ const QuillRefContext = createContext<QuillRefContextType | undefined>(
 export const QuillRefProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const quillRefContext = useRef<ReactQuill>(null);
   const [ref, setRef] = useState<ReactQuill | null>(null);
 
   const setQuillRef = useCallback((ref: ReactQuill) => {
     setRef(ref);
   }, []);
 
-  //   useEffect(() => {
-  //     console.log("quillRefContext updated:", quillRefContext.current);
-  //   }, [quillRefContext.current]);
-
   return (
-    <QuillRefContext.Provider value={{ quillRefContext, ref, setQuillRef }}>
+    <QuillRefContext.Provider value={{ ref, setQuillRef }}>
       {children}
     </QuillRefContext.Provider>
   );

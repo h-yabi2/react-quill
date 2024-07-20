@@ -36,7 +36,7 @@ import { useQuillRef } from "@/context/QuillRefContext";
 
 const Component03: React.FC = () => {
   const quillRef = useRef<ReactQuill>(null);
-  const { quillRefContext, setQuillRef } = useQuillRef();
+  const { ref, setQuillRef } = useQuillRef();
   const [data, setData] = useState(collectionDetail.body);
 
   const BlockEmbed = Quill.import("blots/embed");
