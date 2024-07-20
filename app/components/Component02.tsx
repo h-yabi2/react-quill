@@ -3,7 +3,12 @@
 import React, { useMemo, useRef, LegacyRef } from "react";
 import dynamic from "next/dynamic";
 import type ReactQuill from "react-quill";
-// import { Quill } from "react-quill";
+import "react-quill/dist/quill.snow.css";
+
+interface IWrappedComponent extends React.ComponentProps<typeof ReactQuill> {
+  forwardedRef: LegacyRef<ReactQuill>;
+}
+
 const ReactQuillBase = dynamic(
   async () => {
     const { default: RQ } = await import("react-quill");
@@ -54,11 +59,6 @@ const ReactQuillBase = dynamic(
     ssr: false,
   }
 );
-import "react-quill/dist/quill.snow.css";
-
-interface IWrappedComponent extends React.ComponentProps<typeof ReactQuill> {
-  forwardedRef: LegacyRef<ReactQuill>;
-}
 
 const Component02: React.FC = () => {
   const quillRef = useRef<ReactQuill>(null);
