@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useMemo, useRef, useEffect, useState } from "react";
-import ReactQuill, { Quill } from "react-quill";
+import React, { useMemo, useRef, useEffect, useState, LegacyRef } from "react";
+import dynamic from "next/dynamic";
+import type ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import "@/utils/quill/emoji/custom-emoji";
+// Removed import for custom-emoji.js
 import "./Component07.modules.scss";
 
 // ReactQuill の icon をインポート
@@ -11,76 +12,120 @@ import qlBold from "@/public/img/ql-bold.svg";
 import qlEmoji from "@/public/img/ql-emoji.svg";
 
 // 絵文字
-// import data from "@emoji-mart/data";
-// import data from "@emoji-mart/data/sets/13.1/native.json";
-// twitter の絵文字
-// import data from "@emoji-mart/data/sets/14/twitter.json";
 import data from "@emoji-mart/data/sets/14/google.json";
 import Picker from "@emoji-mart/react";
 import i18n from "@emoji-mart/data/i18n/ja.json";
 
+// 型定義
+interface EmojiSkin {
+  unified: string;
+  native: string;
+  x: number;
+  y: number;
+}
+
+interface Emoji {
+  id: string;
+  name: string;
+  keywords: string[];
+  skins: EmojiSkin[];
+  version: number;
+}
+
+interface EmojiData {
+  emojis: { [key: string]: Emoji };
+}
+
+const emojiData: EmojiData = data as EmojiData;
+
 // delta/collectionDetail.ts から取得したデータ
 import { collectionDetail } from "@/delta/collectionDetail";
 
-const Component03: React.FC = () => {
+interface IWrappedComponent extends React.ComponentProps<typeof ReactQuill> {
+  forwardedRef: LegacyRef<ReactQuill>;
+}
+
+const ReactQuillBase = dynamic(
+  async () => {
+    const { default: RQ } = await import("react-quill");
+
+    function QuillJS({ forwardedRef, ...props }: IWrappedComponent) {
+      const Quill = RQ.Quill;
+      // ここで Quill のカスタムモジュールを定義
+      const BlockEmbed = Quill.import("blots/embed");
+      interface FileBlotProps {
+        src: string;
+        name: string;
+        size?: string;
+      }
+
+      // 画像
+      class ImgBlot extends BlockEmbed {
+        static create(data: FileBlotProps): any {
+          const node = super.create();
+          node.setAttribute("data-extension", data.name);
+          node.src = data.src;
+          node.alt = "画像";
+          return node;
+        }
+
+        static value(domNode: HTMLIFrameElement): any {
+          return {
+            name: domNode.getAttribute("data-extension"),
+            src: domNode.getAttribute("src"),
+          };
+        }
+      }
+
+      // MEMO: 編集機能からアップされた画像かどうかを区別するため、img_blotとして別途登録
+      ImgBlot.blotName = "img_blot";
+      ImgBlot.tagName = "img";
+      // MEMO:クラス名など、このサイト固有のものとわかる何かをセットしないとコピペの時にすべてのimgがツールバーから貼り付けたものと見なされてしまう。ここ変更かけると既存データの復元ができなくなる可能性があるので注意
+      ImgBlot.className = "nodoCollectionImg";
+      Quill.register(ImgBlot, true);
+
+      // 絵文字
+      class EmojiBlot extends BlockEmbed {
+        static create(value: any) {
+          const node = super.create();
+          node.setAttribute("data-id", value.id);
+          node.setAttribute("data-is-original", value.isOriginal);
+          node.setAttribute("data-native", value.native); // Store the native emoji
+          // 絵文字データを取得
+          const emoji = emojiData.emojis[value.id];
+          const nativeEmoji = emoji ? emoji.skins[0].native : value.id;
+
+          node.setAttribute("data-native", nativeEmoji); // Store the native emoji
+          node.innerText = nativeEmoji; // Display the native emoji
+          return node;
+        }
+
+        static value(node: any) {
+          return {
+            id: node.getAttribute("data-id"),
+            isOriginal: node.getAttribute("data-is-original") === "true",
+            native: node.getAttribute("data-native"), // Retrieve the native emoji
+          };
+        }
+      }
+
+      EmojiBlot.blotName = "emoji";
+      EmojiBlot.tagName = "span";
+      EmojiBlot.className = "custom-emoji";
+      Quill.register(EmojiBlot);
+
+      return <RQ ref={forwardedRef} {...props} />;
+    }
+    return QuillJS;
+  },
+  {
+    ssr: false,
+  }
+);
+
+const Component07: React.FC = () => {
   const quillRef = useRef<ReactQuill>(null);
   const [quillData, setData] = useState(collectionDetail.body);
-
-  const BlockEmbed = Quill.import("blots/embed");
-  interface FileBlotProps {
-    src: string;
-    name: string;
-    size?: string;
-  }
-
-  // 画像
-  class ImgBlot extends BlockEmbed {
-    static create(data: FileBlotProps): any {
-      const node = super.create();
-      node.setAttribute("data-extension", data.name);
-      node.src = data.src;
-      node.alt = "画像";
-      return node;
-    }
-
-    static value(domNode: HTMLIFrameElement): any {
-      return {
-        name: domNode.getAttribute("data-extension"),
-        src: domNode.getAttribute("src"),
-      };
-    }
-  }
-
-  // MEMO: 編集機能からアップされた画像かどうかを区別するため、img_blotとして別途登録
-  ImgBlot.blotName = "img_blot";
-  ImgBlot.tagName = "img";
-  // MEMO:クラス名など、このサイト固有のものとわかる何かをセットしないとコピペの時にすべてのimgがツールバーから貼り付けたものと見なされてしまう。ここ変更かけると既存データの復元ができなくなる可能性があるので注意
-  ImgBlot.className = "nodoCollectionImg";
-  Quill.register(ImgBlot, true);
-
-  // 絵文字
-  // class EmojiBlot extends BlockEmbed {
-  //   static create(value: any) {
-  //     const node = super.create();
-  //     node.setAttribute("data-id", value.id);
-  //     node.setAttribute("data-is-original", value.isOriginal);
-  //     node.innerText = value.native;
-  //     return node;
-  //   }
-
-  //   static value(node: any) {
-  //     return {
-  //       id: node.getAttribute("data-id"),
-  //       isOriginal: node.getAttribute("data-is-original") === "true",
-  //       native: node.innerText,
-  //     };
-  //   }
-  // }
-
-  // EmojiBlot.blotName = "emoji";
-  // EmojiBlot.tagName = "span";
-  // EmojiBlot.className = "custom-emoji";
-  // Quill.register(EmojiBlot);
 
   const modules = useMemo(() => {
     return {
@@ -91,19 +136,24 @@ const Component03: React.FC = () => {
           emoji: () => {},
         },
       },
-      "custom-emoji": true,
+      // "custom-emoji": true,
     };
   }, []);
 
   useEffect(() => {
-    if (quillRef.current && quillRef.current.editor) {
-      quillRef.current.setEditorContents(
-        quillRef.current.editor,
-        JSON.parse(collectionDetail.body)
-      );
-      // 編集可能にする
-      quillRef.current.editor.enable();
-    }
+    const interval = setInterval(() => {
+      if (quillRef.current && quillRef.current.editor) {
+        quillRef.current.setEditorContents(
+          quillRef.current.editor,
+          JSON.parse(collectionDetail.body)
+        );
+        // 編集可能にする
+        quillRef.current.editor.enable();
+        clearInterval(interval);
+      }
+    }, 100); // 100msごとにチェック
+
+    return () => clearInterval(interval); // クリーンアップ
   }, []);
 
   // 見出しの矢印を非表示
@@ -208,8 +258,8 @@ const Component03: React.FC = () => {
         </span>
       </div>
 
-      <ReactQuill
-        ref={quillRef}
+      <ReactQuillBase
+        forwardedRef={quillRef}
         modules={modules}
         readOnly={true}
         theme="snow"
@@ -217,11 +267,11 @@ const Component03: React.FC = () => {
         scrollingContainer="html"
       />
       {/* 整形データ */}
-      <div>
+      {/* <div>
         <pre>{JSON.stringify(quillData, null, 2)}</pre>
-      </div>
+      </div> */}
     </div>
   );
 };
 
-export default Component03;
+export default Component07;

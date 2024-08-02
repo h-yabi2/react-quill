@@ -18,8 +18,8 @@ export default function Home() {
         {/* <Component04 /> */}
         {/* <Component05 /> */}
         {/* <Component06 /> */}
-        {/* <Component07 /> */}
-        <Component08 />
+        <Component07 />
+        {/* <Component08 /> */}
         {/* test */}
       </main>
     </QuillRefProvider>
